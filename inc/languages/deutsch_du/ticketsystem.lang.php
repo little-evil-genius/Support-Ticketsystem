@@ -4,7 +4,7 @@ $l['ticketsystem_desc'] = "Welches Thema behandelt deine Frage? Ein entsprechend
 $l['ticketsystem_select'] = "Thema auswählen";
 $l['ticketsystem_error'] = "Du musst ein Thema für dein Support-Beitrag auswählen, damit die entsprechenden Teammitglieder informaiert werden.";
 
-$l['ticketsystem_banner'] = "<a href=\"showthread.php?tid={1}&pid={2}#pid{2}\" target=\"_blank\">{3} hat eine Frage zum Thema <span style=\"font-weight: bold;\">{4}</span></a>";
+$l['ticketsystem_banner'] = "<a href=\"showthread.php?tid={1}&pid={2}#pid{2}\" target=\"_blank\">{3} hat eine Frage zum Thema <span style=\"font-weight: bold;\">{4}</span></a>.";
 $l['ticketsystem_banner_take'] = "<a href=\"misc.php?action=ticketsystem_take&tid={1}\">[Übernehmen]</a>";
 $l['ticketsystem_banner_leave'] = "<a href=\"misc.php?action=ticketsystem_leave&tid={1}\">[Abgeben]</a>";
 $l['ticketsystem_button_solved'] = "erledigt";
