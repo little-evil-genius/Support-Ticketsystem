@@ -20,7 +20,6 @@ $plugins->add_hook("admin_rpgstuff_action_handler", "ticketsystem_admin_rpgstuff
 $plugins->add_hook("admin_rpgstuff_permissions", "ticketsystem_admin_rpgstuff_permissions");
 $plugins->add_hook("admin_rpgstuff_menu", "ticketsystem_admin_rpgstuff_menu");
 $plugins->add_hook("admin_load", "ticketsystem_admin_manage");
-$plugins->add_hook("admin_rpgstuff_update_stylesheet", "ticketsystem_admin_update_stylesheet");
 $plugins->add_hook("admin_rpgstuff_update_plugin", "ticketsystem_admin_update_plugin");
 $plugins->add_hook("newthread_start", "ticketsystem_newthread_start");
 $plugins->add_hook("datahandler_post_validate_thread", "ticketsystem_validate_newthread");
@@ -94,17 +93,6 @@ function ticketsystem_install() {
     $db->insert_query("templategroups", $templategroup);
     // Templates 
     ticketsystem_templates();
-    
-    // STYLESHEET HINZUFÜGEN
-	require_once MYBB_ADMIN_DIR."inc/functions_themes.php";
-    $css = ticketsystem_stylesheet();
-    $sid = $db->insert_query("themestylesheets", $css);
-	$db->update_query("themestylesheets", array("cachefile" => "ticketsystem.css"), "sid = '".$sid."'", 1);
-
-	$tids = $db->simple_select("themes", "tid");
-	while($theme = $db->fetch_array($tids)) {
-		update_theme_stylesheet_list($theme['tid']);
-	}
 }
  
 // Funktion zur Überprüfung des Installationsstatus; liefert true zurürck, wenn Plugin installiert, sonst false (optional).
@@ -149,14 +137,6 @@ function ticketsystem_uninstall() {
 
     // TEMPLATES LÖSCHEN
     $db->delete_query("templates", "title LIKE 'ticketsystem%'");
-
-    // STYLESHEET ENTFERNEN
-	require_once MYBB_ADMIN_DIR."inc/functions_themes.php";
-	$db->delete_query("themestylesheets", "name = 'ticketsystem.css'");
-	$query = $db->simple_select("themes", "tid");
-	while($theme = $db->fetch_array($query)) {
-		update_theme_stylesheet_list($theme['tid']);
-	}
 }
  
 // Diese Funktion wird aufgerufen, wenn das Plugin aktiviert wird.
@@ -186,7 +166,6 @@ function ticketsystem_activate() {
 	find_replace_templatesets('forumdisplay_thread', '#'.preg_quote('{$thread[\'threadprefix\']}').'#', '{$ticketsystem_prefix}{$thread[\'threadprefix\']}');
 	find_replace_templatesets('forumdisplay_thread', '#'.preg_quote('{$thread[\'profilelink\']}').'#', '{$ticketsystem_teammember}{$thread[\'profilelink\']}');
 	find_replace_templatesets('header', '#'.preg_quote('{$pm_notice}').'#', '{$ticketsystem_banner}{$pm_notice}');
-	find_replace_templatesets('newthread', '#'.preg_quote('{$posticons}').'#', '{$newthread_ticketsystem} {$posticons}');
 }
  
 // Diese Funktion wird aufgerufen, wenn das Plugin deaktiviert wird.
@@ -212,7 +191,6 @@ function ticketsystem_deactivate() {
     find_replace_templatesets("forumdisplay_thread", "#".preg_quote('{$ticketsystem_prefix}')."#i", '', 0);
     find_replace_templatesets("forumdisplay_thread", "#".preg_quote('{$ticketsystem_teammember}')."#i", '', 0);
     find_replace_templatesets("header", "#".preg_quote('{$ticketsystem_banner}')."#i", '', 0);
-    find_replace_templatesets("newthread", "#".preg_quote('{$newthread_ticketsystem}')."#i", '', 0);
 }
 
 ######################
@@ -607,56 +585,6 @@ function ticketsystem_admin_manage() {
     }
 }
 
-// Stylesheet zum Master Style hinzufügen
-function ticketsystem_admin_update_stylesheet(&$table) {
-
-    global $db, $mybb, $lang;
-	
-    $lang->load('rpgstuff_stylesheet_updates');
-
-    require_once MYBB_ADMIN_DIR."inc/functions_themes.php";
-
-    // HINZUFÜGEN
-    if ($mybb->input['action'] == 'add_master' AND $mybb->get_input('plugin') == "ticketsystem") {
-
-        $css = ticketsystem_stylesheet();
-        
-        $sid = $db->insert_query("themestylesheets", $css);
-        $db->update_query("themestylesheets", array("cachefile" => "ticketsystem.css"), "sid = '".$sid."'", 1);
-    
-        $tids = $db->simple_select("themes", "tid");
-        while($theme = $db->fetch_array($tids)) {
-            update_theme_stylesheet_list($theme['tid']);
-        } 
-
-        flash_message($lang->stylesheets_flash, "success");
-        admin_redirect("index.php?module=rpgstuff-stylesheet_updates");
-    }
-
-    // Zelle mit dem Namen des Themes
-    $table->construct_cell("<b>".htmlspecialchars_uni("Support-Ticketsystem")."</b>", array('width' => '70%'));
-
-    // Ob im Master Style vorhanden
-    $master_check = $db->fetch_field($db->query("SELECT tid FROM ".TABLE_PREFIX."themestylesheets 
-    WHERE name = 'ticketsystem.css' 
-    AND tid = 1
-    "), "tid");
-    
-    if (!empty($master_check)) {
-        $masterstyle = true;
-    } else {
-        $masterstyle = false;
-    }
-
-    if (!empty($masterstyle)) {
-        $table->construct_cell($lang->stylesheets_masterstyle, array('class' => 'align_center'));
-    } else {
-        $table->construct_cell("<a href=\"index.php?module=rpgstuff-stylesheet_updates&action=add_master&plugin=ticketsystem\">".$lang->stylesheets_add."</a>", array('class' => 'align_center'));
-    }
-    
-    $table->construct_row();
-}
-
 // Plugin Update
 function ticketsystem_admin_update_plugin(&$table) {
 
@@ -669,49 +597,6 @@ function ticketsystem_admin_update_plugin(&$table) {
 
         // Templates 
         ticketsystem_templates('update');
-
-        // Stylesheet
-        $update_data = ticketsystem_stylesheet_update();
-        $update_stylesheet = $update_data['stylesheet'];
-        $update_string = $update_data['update_string'];
-        if (!empty($update_string)) {
-
-            // Ob im Master Style die Überprüfung vorhanden ist
-            $masterstylesheet = $db->fetch_field($db->query("SELECT stylesheet FROM ".TABLE_PREFIX."themestylesheets WHERE tid = 1 AND name = 'ticketsystem.css'"), "stylesheet");
-            $masterstylesheet = (string)($masterstylesheet ?? '');
-            $update_string = (string)($update_string ?? '');
-            $pos = strpos($masterstylesheet, $update_string);
-            if ($pos === false) { // nicht vorhanden 
-            
-                $theme_query = $db->simple_select('themes', 'tid, name');
-                while ($theme = $db->fetch_array($theme_query)) {
-        
-                    $stylesheet_query = $db->simple_select("themestylesheets", "*", "name='".$db->escape_string('ticketsystem.css')."' AND tid = ".$theme['tid']);
-                    $stylesheet = $db->fetch_array($stylesheet_query);
-        
-                    if ($stylesheet) {
-
-                        require_once MYBB_ADMIN_DIR."inc/functions_themes.php";
-        
-                        $sid = $stylesheet['sid'];
-            
-                        $updated_stylesheet = array(
-                            "cachefile" => $db->escape_string($stylesheet['name']),
-                            "stylesheet" => $db->escape_string($stylesheet['stylesheet']."\n\n".$update_stylesheet),
-                            "lastmodified" => TIME_NOW
-                        );
-            
-                        $db->update_query("themestylesheets", $updated_stylesheet, "sid='".$sid."'");
-            
-                        if(!cache_stylesheet($theme['tid'], $stylesheet['name'], $updated_stylesheet['stylesheet'])) {
-                            $db->update_query("themestylesheets", array('cachefile' => "css.php?stylesheet=".$sid), "sid='".$sid."'", 1);
-                        }
-            
-                        update_theme_stylesheet_list($theme['tid']);
-                    }
-                }
-            } 
-        }
 
         // Datenbanktabellen & Felder
         ticketsystem_database();
@@ -1266,9 +1151,9 @@ function ticketsystem_get_allchars($user_id) {
 	return $charas;  
 }
 
-#####################################################
-### DATABASE | SETTINGS | TEMPLATES | STYLESHEETS ###
-#####################################################
+#######################################
+### DATABASE | SETTINGS | TEMPLATES ###
+#######################################
 
 // DATENBANKTABELLE & FELD
 function ticketsystem_database() {
@@ -1469,39 +1354,6 @@ function ticketsystem_templates($mode = '') {
             }
         }
     }
-}
-
-// STYLESHEET MASTER
-function ticketsystem_stylesheet() {
-
-    global $db;
-    
-    $css = array(
-		'name' => 'ticketsystem.css',
-		'tid' => 1,
-		'attachedto' => '',
-		'stylesheet' =>	'',
-		'cachefile' => 'ticketsystem.css',
-		'lastmodified' => TIME_NOW
-	);
-
-    return $css;
-}
-
-// STYLESHEET UPDATE
-function ticketsystem_stylesheet_update() {
-
-    // Update-Stylesheet
-    // wird an bestehende Stylesheets immer ganz am ende hinzugefügt
-    $update = '';
-
-    // Definiere den  Überprüfung-String (muss spezifisch für die Überprüfung sein)
-    $update_string = '';
-
-    return array(
-        'stylesheet' => $update,
-        'update_string' => $update_string
-    );
 }
 
 // UPDATE CHECK
