@@ -186,6 +186,7 @@ function ticketsystem_activate() {
 	find_replace_templatesets('forumdisplay_thread', '#'.preg_quote('{$thread[\'threadprefix\']}').'#', '{$ticketsystem_prefix}{$thread[\'threadprefix\']}');
 	find_replace_templatesets('forumdisplay_thread', '#'.preg_quote('{$thread[\'profilelink\']}').'#', '{$ticketsystem_teammember}{$thread[\'profilelink\']}');
 	find_replace_templatesets('header', '#'.preg_quote('{$pm_notice}').'#', '{$ticketsystem_banner}{$pm_notice}');
+	find_replace_templatesets('newthread', '#'.preg_quote('{$posticons}').'#', '{$newthread_ticketsystem} {$posticons}');
 }
  
 // Diese Funktion wird aufgerufen, wenn das Plugin deaktiviert wird.
@@ -211,6 +212,7 @@ function ticketsystem_deactivate() {
     find_replace_templatesets("forumdisplay_thread", "#".preg_quote('{$ticketsystem_prefix}')."#i", '', 0);
     find_replace_templatesets("forumdisplay_thread", "#".preg_quote('{$ticketsystem_teammember}')."#i", '', 0);
     find_replace_templatesets("header", "#".preg_quote('{$ticketsystem_banner}')."#i", '', 0);
+    find_replace_templatesets("newthread", "#".preg_quote('{$newthread_ticketsystem}')."#i", '', 0);
 }
 
 ######################
