@@ -52,6 +52,7 @@ Das Layout wurde auf ein MyBB Default Design angepasst.
 
 # Neue Variablen
 - header: {$ticketsystem_banner}
+- newthread: {$newthread_ticketsystem}
 - showthread: {$ticketsystem_button} + {$ticketsystem_prefix} + {$ticketsystem_teammember}
 - forumdisplay_thread: {$ticketsystem_prefix} + {$ticketsystem_teammember}
 
