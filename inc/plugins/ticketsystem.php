@@ -595,6 +595,10 @@ function ticketsystem_admin_update_plugin(&$table) {
     // UPDATE
     if ($mybb->input['action'] == 'add_update' AND $mybb->get_input('plugin') == "ticketsystem") {
 
+        // Einstellungen überprüfen => Type = update
+        ticketsystem_settings('update');
+        rebuild_settings();
+
         // Templates 
         ticketsystem_templates('update');
 
