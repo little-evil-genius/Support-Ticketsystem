@@ -161,6 +161,7 @@ function ticketsystem_activate() {
 
     // VARIABLEN EINFÜGEN
     require MYBB_ROOT."/inc/adminfunctions_templates.php";
+	find_replace_templatesets('newthread', '#'.preg_quote('{$posticons}').'#', '{$newthread_ticketsystem} {$posticons}');
 	find_replace_templatesets('showthread', '#'.preg_quote('{$newreply}').'#', '{$newreply} {$ticketsystem_button}');
 	find_replace_templatesets('showthread', '#'.preg_quote('{$thread[\'subject\']}').'#', '{$ticketsystem_prefix}{$thread[\'subject\']}{$ticketsystem_teammember}');
 	find_replace_templatesets('forumdisplay_thread', '#'.preg_quote('{$thread[\'threadprefix\']}').'#', '{$ticketsystem_prefix}{$thread[\'threadprefix\']}');
@@ -185,6 +186,7 @@ function ticketsystem_deactivate() {
     
     // VARIABLEN ENTFERNEN
     require MYBB_ROOT."/inc/adminfunctions_templates.php";
+    find_replace_templatesets("newthread", "#".preg_quote('{$newthread_ticketsystem}')."#i", '', 0);
     find_replace_templatesets("showthread", "#".preg_quote('{$ticketsystem_button}')."#i", '', 0);
     find_replace_templatesets("showthread", "#".preg_quote('{$ticketsystem_prefix}')."#i", '', 0);
     find_replace_templatesets("showthread", "#".preg_quote('{$ticketsystem_teammember}')."#i", '', 0);
