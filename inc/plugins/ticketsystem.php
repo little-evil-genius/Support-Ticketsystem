@@ -41,7 +41,7 @@ function ticketsystem_info()
 		"website"	=> "https://github.com/little-evil-genius/Support-Ticketsystem",
 		"author"	=> "little.evil.genius",
 		"authorsite"	=> "https://storming-gates.de/member.php?action=profile&uid=1712",
-		"version"	=> "1.0",
+		"version"	=> "1.0.1",
 		"compatibility" => "18*"
 	);
 }
@@ -393,7 +393,7 @@ function ticketsystem_admin_manage() {
                 $InputMember_values = $mybb->get_input('teammembers', MyBB::INPUT_ARRAY);
 			} else {
                 $inputs_teammember = "";
-                $InputMember_values = array_filter(explode(",", $inputs_teammember));
+                $InputMember_values = array_filter(explode(",", $inputs_teammember),static fn($v) => $v !== '');
             }
 
             // Build the form
@@ -493,7 +493,7 @@ function ticketsystem_admin_manage() {
             $sub_tabs['edit'] = [
 				"title" => $lang->ticketsystem_tabs_edit,
 				"link" => "index.php?module=rpgstuff-ticketsystem&amp;action=edit",
-				"description" => $lang->ticketsystem_tabs_edit_desc
+				"description" => $lang->sprintf($lang->ticketsystem_tabs_edit_desc, $prefix['title'])
 			];
             $page->output_nav_tabs($sub_tabs, 'edit');
 
@@ -507,7 +507,7 @@ function ticketsystem_admin_manage() {
 				$title = $prefix['title'];
 				$displaystyle = $prefix['displaystyle'];
                 $inputs_teammember = $prefix['teammembers'];
-                $InputMember_values = array_filter(explode(",", $inputs_teammember));
+                $InputMember_values = array_filter(explode(",", $inputs_teammember),static fn($v) => $v !== '');
             }
 
             // Build the form
